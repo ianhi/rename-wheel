@@ -132,9 +132,7 @@ def download_compatible_wheel(
         if version:
             # Use packaging.specifiers for PEP 440 version matching
             specifier = SpecifierSet(version, prereleases=True)
-            wheels = [
-                w for w in wheels if w.version and Version(w.version) in specifier
-            ]
+            wheels = [w for w in wheels if w.version and Version(w.version) in specifier]
             if not wheels:
                 print(f"No wheels found for {package} matching {version}", file=sys.stderr)
                 return None
