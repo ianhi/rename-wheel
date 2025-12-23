@@ -29,11 +29,10 @@ pip install wheel-rename
 Here's a complete example of setting up both icechunk versions for regression testing:
 
 ```bash
-# 1. Download v1 wheel from nightly builds
-pip download icechunk \
-    --index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple \
-    --no-deps \
-    -d ./wheels/
+# 1. Download v1 wheel from nightly builds (no pip required!)
+uvx wheel-rename download icechunk \
+    -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple \
+    -o ./wheels/
 
 # 2. Inspect the wheel to verify it's renamable
 uvx wheel-rename inspect ./wheels/icechunk-*.whl
@@ -49,33 +48,6 @@ uv pip install icechunk                     # v2 from PyPI
 # 5. Verify both work
 uv run python -c "import icechunk_v1; print(f'v1: {icechunk_v1.__version__}')"
 uv run python -c "import icechunk; print(f'v2: {icechunk.__version__}')"
-```
-
-### Downloading Wheels
-
-Use `pip download` to fetch wheels (note: `uv pip download` is not yet available):
-
-```bash
-# For your current platform
-pip download icechunk \
-    --index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple \
-    --no-deps \
-    -d ./wheels/
-
-# For a specific platform (cross-platform download)
-pip download icechunk \
-    --index-url <index-url> \
-    --no-deps \
-    --python-version 3.12 \
-    --platform manylinux_2_17_x86_64 \
-    --only-binary=:all: \
-    -d ./wheels/
-
-# Available platforms:
-#   - manylinux_2_17_x86_64 (Linux x86_64)
-#   - manylinux_2_17_aarch64 (Linux ARM64)
-#   - macosx_11_0_arm64 (macOS Apple Silicon)
-#   - macosx_10_9_x86_64 (macOS Intel)
 ```
 
 ## Commands

@@ -20,7 +20,8 @@ classifiers = [
 dependencies = [
     "click>=8.0",
     "packaging>=23.0",
-    "httpx>=0.25",
+    "pypi-simple>=1.0",
+    "rich>=13.0",
 ]
 
 [project.optional-dependencies]

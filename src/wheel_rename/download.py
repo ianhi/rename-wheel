@@ -1,0 +1,150 @@
+"""Download wheels from PEP 503 compatible package indexes.
+
+This module provides functionality to download wheels from package indexes
+like PyPI or Anaconda.org without requiring pip to be installed.
+
+Uses pypi-simple for PEP 503 parsing and packaging.tags for platform matching.
+"""
+
+from __future__ import annotations
+
+import sys
+from typing import TYPE_CHECKING
+
+from packaging.tags import Tag, sys_tags
+from packaging.version import Version
+from pypi_simple import PyPISimple
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from pypi_simple import DistributionPackage
+
+
+def get_compatible_tags() -> list[Tag]:
+    """Get ordered list of compatible tags for current platform."""
+    return list(sys_tags())
+
+
+def parse_wheel_tags(filename: str) -> list[Tag]:
+    """Extract platform tags from a wheel filename."""
+    # Format: {dist}-{ver}(-{build})?-{py}-{abi}-{plat}.whl
+    name = filename[:-4]  # Remove .whl
+    parts = name.split("-")
+
+    if len(parts) < 5:
+        return []
+
+    # Handle optional build tag (starts with digit)
+    if len(parts) >= 6 and parts[2][0].isdigit():
+        py_tag = parts[3]
+        abi_tag = parts[4]
+        plat_tags = parts[5].split(".")
+    else:
+        py_tag = parts[2]
+        abi_tag = parts[3]
+        plat_tags = parts[4].split(".")
+
+    return [Tag(py_tag, abi_tag, plat) for plat in plat_tags]
+
+
+def best_wheel(
+    packages: list[DistributionPackage],
+    compatible_tags: list[Tag] | None = None,
+) -> DistributionPackage | None:
+    """Find the best compatible wheel (highest version, most specific tag)."""
+    if compatible_tags is None:
+        compatible_tags = get_compatible_tags()
+
+    # Create tag priority map (lower index = higher priority)
+    tag_priority = {tag: i for i, tag in enumerate(compatible_tags)}
+
+    compatible: list[tuple[DistributionPackage, Version, int]] = []
+
+    for pkg in packages:
+        if pkg.package_type != "wheel":
+            continue
+
+        wheel_tags = parse_wheel_tags(pkg.filename)
+        best_priority = float("inf")
+
+        for tag in wheel_tags:
+            if tag in tag_priority:
+                best_priority = min(best_priority, tag_priority[tag])
+
+        if best_priority < float("inf"):
+            version = Version(pkg.version) if pkg.version else Version("0")
+            compatible.append((pkg, version, int(best_priority)))
+
+    if not compatible:
+        return None
+
+    # Sort by version (descending), then tag priority (ascending)
+    compatible.sort(key=lambda x: (-x[1].major, -x[1].minor, -x[1].micro, x[2]))
+    return compatible[0][0]
+
+
+def list_wheels(
+    package: str,
+    index_url: str = "https://pypi.org/simple/",
+) -> list[DistributionPackage]:
+    """List available wheel files for a package."""
+    with PyPISimple(index_url) as client:
+        page = client.get_project_page(package)
+        return [p for p in page.packages if p.package_type == "wheel"]
+
+
+def download_compatible_wheel(
+    package: str,
+    output_dir: Path,
+    index_url: str = "https://pypi.org/simple/",
+    version: str | None = None,
+    show_progress: bool = True,
+) -> Path | None:
+    """Download the best compatible wheel for the current platform.
+
+    Args:
+        package: Package name
+        output_dir: Directory to save the file
+        index_url: Base URL of the simple repository index
+        version: Optional version constraint (exact match)
+        show_progress: Whether to show download progress
+
+    Returns:
+        Path to downloaded wheel, or None if no compatible wheel found
+    """
+    from pathlib import Path as PathLib
+
+    output_dir = PathLib(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    with PyPISimple(index_url) as client:
+        page = client.get_project_page(package)
+        packages = list(page.packages)
+
+        if not packages:
+            print(f"No packages found for {package}", file=sys.stderr)
+            return None
+
+        wheels = [p for p in packages if p.package_type == "wheel"]
+
+        if version:
+            target_version = Version(version)
+            wheels = [w for w in wheels if w.version and Version(w.version) == target_version]
+            if not wheels:
+                print(f"No wheels found for {package}=={version}", file=sys.stderr)
+                return None
+
+        compatible_tags = get_compatible_tags()
+        wheel = best_wheel(wheels, compatible_tags)
+
+        if wheel is None:
+            print(f"No compatible wheel found for {package} on this platform", file=sys.stderr)
+            return None
+
+        if show_progress:
+            print(f"Found: {wheel.filename}")
+
+        output_path = output_dir / wheel.filename
+        client.download_package(wheel, output_path, progress=show_progress)
+        return output_path
