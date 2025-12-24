@@ -60,6 +60,42 @@ uv run python -c "import icechunk; print(f'v2: {icechunk.__version__}')"
 uvx spare-tire inspect ./wheels/icechunk-*.whl
 ```
 
+## Example: Conflicting Dependencies (zarr v2 + v3)
+
+When packages have conflicting dependencies, use `--rename-dep` to rename the entire dependency tree:
+
+```bash
+# Scenario: Your package needs both zarr v2 API and zarr v3 API
+
+# 1. Download zarr v2 and rename to zarr_v2
+uvx spare-tire download zarr --version ">=2,<3" --rename zarr_v2 -o ./wheels/
+
+# 2. Rename your package that uses zarr v2, updating its dependency
+uvx spare-tire rename myreader-1.0.0.whl myreader_v1 \
+    --rename-dep zarr=zarr_v2 \
+    -o ./wheels/
+
+# 3. Install both versions
+pip install zarr  # v3
+pip install ./wheels/zarr_v2-*.whl
+pip install ./wheels/myreader_v1-*.whl
+```
+
+Now in Python:
+
+```python
+import zarr           # v3.x
+import zarr_v2        # v2.x (renamed)
+import myreader       # uses zarr v3
+import myreader_v1    # uses zarr_v2
+
+# Both can read the same Zarr format 2 data!
+data_v3 = myreader.read_data("store.zarr")
+data_v2 = myreader_v1.read_data("store.zarr")
+```
+
+See `tests/fixtures/zarr-compat/` for a complete working example.
+
 ## Commands
 
 ### 🛞 rename
