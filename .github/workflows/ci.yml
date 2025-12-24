@@ -53,7 +53,7 @@ jobs:
       - name: Set up Python 3.12
         run: uv python install 3.12
 
-      - name: Install wheel-rename
+      - name: Install spare-tire
         run: uv sync --all-extras --python 3.12
 
       - name: Download icechunk wheel from nightly
@@ -67,8 +67,8 @@ jobs:
       - name: Inspect and rename wheel
         run: |
           if ls wheels/icechunk-*.whl 1> /dev/null 2>&1; then
-            uv run wheel-rename inspect wheels/icechunk-*.whl
-            uv run wheel-rename rename wheels/icechunk-*.whl icechunk_v1 -o ./wheels/
+            uv run spare-tire inspect wheels/icechunk-*.whl
+            uv run spare-tire rename wheels/icechunk-*.whl icechunk_v1 -o ./wheels/
             ls -la wheels/
           else
             echo "No wheel found, skipping"
@@ -110,13 +110,13 @@ jobs:
       - name: Set up Python 3.12
         run: uv python install 3.12
 
-      - name: Install wheel-rename with server extras
+      - name: Install spare-tire with server extras
         run: uv sync --all-extras --python 3.12
 
       - name: Start proxy server
         run: |
           # Start proxy in background with icechunk v1 (<2) renamed
-          uv run wheel-rename serve \
+          uv run spare-tire serve \
             -u https://pypi.anaconda.org/scientific-python-nightly-wheels/simple \
             -r "icechunk=icechunk_v1:<2" \
             --port 8123 &

@@ -11,7 +11,7 @@ from packaging.version import Version
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from wheel_rename.server.config import ProxyConfig, RenameRule
+    from spare_tire.server.config import ProxyConfig, RenameRule
 
 
 class UpstreamClient:

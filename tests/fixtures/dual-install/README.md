@@ -1,7 +1,7 @@
 # Dual Icechunk Version Installation Example
 
 This directory demonstrates how to install two versions of icechunk side-by-side
-using `wheel-rename` as a proxy server.
+using `spare-tire` as a proxy server.
 
 ## Use Case
 
@@ -11,11 +11,11 @@ environment.
 
 ## How It Works
 
-1. **Start the wheel-rename proxy** that renames `icechunk` → `icechunk_v1` for
+1. **Start the spare-tire proxy** that renames `icechunk` → `icechunk_v1` for
    versions less than 2.0:
 
    ```bash
-   wheel-rename serve \
+   spare-tire serve \
        -u https://pypi.anaconda.org/scientific-python-nightly-wheels/simple \
        -r "icechunk=icechunk_v1:<2" \
        --port 8123
@@ -59,8 +59,8 @@ The `pyproject.toml` configures:
 
 ```bash
 # Terminal 1: Start the proxy
-cd /path/to/wheel-rename
-uv run wheel-rename serve \
+cd /path/to/spare-tire
+uv run spare-tire serve \
     -u https://pypi.anaconda.org/scientific-python-nightly-wheels/simple \
     -r "icechunk=icechunk_v1:<2" \
     --port 8123

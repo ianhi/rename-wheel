@@ -8,10 +8,10 @@ from typing import TYPE_CHECKING
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import RedirectResponse
 
-from wheel_rename.server.config import ProxyConfig  # noqa: TC001 - used at runtime
-from wheel_rename.server.html import generate_project_index, generate_root_index
-from wheel_rename.server.stream import original_filename_from_renamed, stream_and_rename_wheel
-from wheel_rename.server.upstream import UpstreamClient
+from spare_tire.server.config import ProxyConfig  # noqa: TC001 - used at runtime
+from spare_tire.server.html import generate_project_index, generate_root_index
+from spare_tire.server.stream import original_filename_from_renamed, stream_and_rename_wheel
+from spare_tire.server.upstream import UpstreamClient
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
@@ -37,7 +37,7 @@ def create_app(config: ProxyConfig) -> FastAPI:
             yield
 
     app = FastAPI(
-        title="wheel-rename proxy",
+        title="spare-tire proxy",
         description="PEP 503 compatible package index with on-the-fly renaming",
         lifespan=lifespan,
     )

@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from wheel_rename.server.upstream import UpstreamClient
+    from spare_tire.server.upstream import UpstreamClient
 
 
 async def rename_wheel_bytes(
@@ -21,7 +21,7 @@ async def rename_wheel_bytes(
     Returns:
         Renamed wheel bytes
     """
-    from wheel_rename.rename import rename_wheel_from_bytes
+    from spare_tire.rename import rename_wheel_from_bytes
 
     return rename_wheel_from_bytes(wheel_bytes, new_name)
 
