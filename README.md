@@ -78,6 +78,22 @@ spare-tire rename ./downloads/pkg.whl my_pkg_old -o ./renamed/
 
 - `-o, --output`: Output directory (default: same as input)
 - `--no-update-imports`: Don't update import statements in Python files
+- `--rename-dep`: Rename a dependency (can be used multiple times). See below.
+
+#### Renaming dependencies
+
+When a package has dependencies that also need renaming, use `--rename-dep`:
+
+```bash
+# If mypkg v1 depends on mydep<2, rename both:
+spare-tire rename mydep-1.0.0.whl mydep_v1 -o ./wheels/
+spare-tire rename mypkg-1.0.0.whl mypkg_v1 --rename-dep mydep=mydep_v1 -o ./wheels/
+```
+
+This updates:
+
+- `Requires-Dist: mydep<2` → `Requires-Dist: mydep_v1<2` in METADATA
+- `from mydep import ...` → `from mydep_v1 import ...` in Python files
 
 ### 🛞 download
 
