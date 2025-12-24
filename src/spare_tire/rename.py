@@ -117,14 +117,20 @@ def _update_python_imports(content: bytes, old_name: str, new_name: str) -> byte
     - from old_name import ...
     - import old_name
     - from old_name.submodule import ...
+    - old_name.attribute (module attribute access)
     """
     text = content.decode("utf-8")
 
-    # Pattern to match imports (be careful not to replace partial matches)
+    # Pattern to match imports and module references
     # Only replace if old_name is a complete module name (word boundary)
     patterns = [
+        # from pkg import ... or from pkg.sub import ...
         (rf"\bfrom {re.escape(old_name)}(\s|\.)", rf"from {new_name}\1"),
+        # import pkg or import pkg as alias
         (rf"\bimport {re.escape(old_name)}\b", f"import {new_name}"),
+        # pkg.attribute (module attribute access, but not in strings)
+        # This handles cases like: zarr.open(), zarr.__version__
+        (rf"\b{re.escape(old_name)}\.", f"{new_name}."),
     ]
 
     for pattern, replacement in patterns:
