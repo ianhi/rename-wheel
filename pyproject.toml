@@ -1,12 +1,12 @@
 [project]
-name = "wheel-rename"
+name = "spare-tire"
 version = "0.1.0"
 description = "A tool to rename Python wheel packages for multi-version installation"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "BSD-3-Clause" }
 authors = [{ name = "Ian Hunt-Isaak", email = "ianhuntisaak@gmail.com" }]
-keywords = ["wheel", "packaging", "rename", "pip"]
+keywords = ["wheel", "packaging", "rename", "pip", "spare-tire"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -33,14 +33,14 @@ server = [
 ]
 
 [project.scripts]
-wheel-rename = "wheel_rename.cli:main"
+spare-tire = "spare_tire.cli:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/wheel_rename"]
+packages = ["src/spare_tire"]
 
 [tool.ruff]
 line-length = 100
@@ -67,7 +67,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["wheel_rename"]
+known-first-party = ["spare_tire"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["TCH003"] # Allow runtime imports in tests for pytest fixtures

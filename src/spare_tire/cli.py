@@ -1,4 +1,4 @@
-"""Command-line interface for wheel-rename."""
+"""Command-line interface for spare-tire."""
 
 from __future__ import annotations
 
@@ -11,27 +11,17 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from wheel_rename.download import download_compatible_wheel, list_wheels
-from wheel_rename.rename import inspect_wheel, rename_wheel
+from spare_tire.download import download_compatible_wheel, list_wheels
+from spare_tire.rename import inspect_wheel, rename_wheel
 
 console = Console()
 err_console = Console(stderr=True)
 
 
-class DefaultToRename(click.Group):
-    """Custom group that defaults to 'rename' command when first arg is a .whl file."""
-
-    def parse_args(self, ctx: click.Context, args: list[str]) -> list[str]:
-        # If first arg looks like a wheel file, insert 'rename' command
-        if args and args[0].endswith(".whl") and not args[0].startswith("-"):
-            args = ["rename", *args]
-        return super().parse_args(ctx, args)
-
-
-@click.group(cls=DefaultToRename)
+@click.group()
 @click.version_option()
 def main() -> None:
-    """Rename Python wheel packages for multi-version installation."""
+    """Spare Tire - Rename Python wheel packages for multi-version installation."""
     pass
 
 
@@ -198,11 +188,11 @@ def download(
 
     Examples:
 
-        wheel-rename download numpy -o ./wheels/
+        spare-tire download numpy -o ./wheels/
 
-        wheel-rename download icechunk -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+        spare-tire download icechunk -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
 
-        wheel-rename download requests --list
+        spare-tire download requests --list
     """
     try:
         if list_only:
@@ -296,12 +286,12 @@ def serve(
     \b
     Examples:
         # Start with CLI options
-        wheel-rename serve \\
+        spare-tire serve \\
             -u https://pypi.anaconda.org/scientific-python-nightly-wheels/simple \\
             -r "icechunk=icechunk_v1:<2"
 
         # Start with config file
-        wheel-rename serve -c proxy.toml
+        spare-tire serve -c proxy.toml
 
     \b
     Config file format (proxy.toml):
@@ -318,11 +308,11 @@ def serve(
     try:
         import uvicorn
 
-        from wheel_rename.server import create_app, load_config
+        from spare_tire.server import create_app, load_config
     except ImportError as e:
         err_console.print(
             "[red]✗ Error:[/red] Server dependencies not installed.\n"
-            "Install with: [bold]pip install wheel-rename[server][/bold]"
+            "Install with: [bold]pip install spare-tire[server][/bold]"
         )
         err_console.print(f"[dim]Missing: {e}[/dim]")
         sys.exit(1)
@@ -353,7 +343,7 @@ def serve(
         # Print startup info
         console.print(
             Panel.fit(
-                f"[bold]wheel-rename proxy[/bold]\n"
+                f"[bold]spare-tire proxy[/bold]\n"
                 f"Listening on: [cyan]http://{cfg.host}:{cfg.port}[/cyan]\n"
                 f"Upstreams: {len(cfg.upstreams)}\n"
                 f"Renames: {len(cfg.renames)}",
