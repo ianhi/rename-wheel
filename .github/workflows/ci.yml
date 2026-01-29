@@ -59,7 +59,7 @@ jobs:
       - name: Download icechunk wheel from nightly
         run: |
           mkdir -p wheels
-          pip download icechunk \
+          uv run python -m pip download icechunk \
             --index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple \
             --no-deps \
             -d ./wheels/ || echo "Download failed, skipping integration test"
